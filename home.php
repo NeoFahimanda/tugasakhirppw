@@ -290,7 +290,7 @@ $all_posts = $postObj->getAllPosts();
 
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <label for="post_img" class="custom-file-upload">
-                                🖼️ Tambah Gambar
+                                Tambah Gambar
                             </label>
                             <input type="file" name="post_img" id="post_img" accept="image/png, image/jpeg" class="input-file-hidden">
 
