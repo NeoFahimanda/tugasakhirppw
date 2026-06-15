@@ -53,6 +53,7 @@ if (!$profile_data) {
 $user_posts = $postObj->getPostsByUserId($profile_data['id']);
 ?>
 
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -193,6 +194,26 @@ $user_posts = $postObj->getPostsByUserId($profile_data['id']);
             margin: 10px 0 0 0;
             line-height: 1.5;
         }
+
+        .flash-msg {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 
@@ -206,7 +227,7 @@ $user_posts = $postObj->getPostsByUserId($profile_data['id']);
 
         <div class="mid-col">
             <div class="header-title">
-                <a href="home.php" style="text-decoration:none; color:black; margin-right:15px;">⬅️</a>
+                <a href="home.php" style="text-decoration:none; color:black; margin-right:15px;">⬅</a>
                 <?php echo htmlspecialchars($profile_data['name']); ?>
             </div>
 
@@ -246,6 +267,15 @@ $user_posts = $postObj->getPostsByUserId($profile_data['id']);
 
                             <a href="post_detail.php?id=<?php echo $post['id']; ?>" style="text-decoration: none; color: inherit; display: block;">
                                 <p style="margin: 10px 0 0 0; line-height: 1.5;"><?php echo htmlspecialchars($post['content']); ?></p>
+                                <?php if (!empty($post['post_image'])): ?>
+                                    <div style="margin-top: 10px;">
+                                        <img src="uploads/posts/<?php echo $post['post_image']; ?>" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
+
+                                        <div style="margin-top: 5px;">
+                                            <a href="download.php?file=<?php echo urlencode($post['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">📥 Download Gambar</a>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                             </a>
 
                             <?php

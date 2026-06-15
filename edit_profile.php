@@ -1,60 +1,51 @@
 <?php
 session_start();
-
-// Pengecekan Session: Wajib Login!
 if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+    header("Location: login.php");
     exit;
 }
 
 require_once 'classes/User.php';
+require_once 'classes/Flash.php';
+
 $userObj = new User();
-
 $user_id = $_SESSION['user_id'];
-$user_data = $userObj->getUserById($user_id); // Ambil data saat ini untuk isi nilai default form
-$msg = "";
+$user_data = $userObj->getUserById($user_id);
 
-// Jika tombol 'Simpan Profil' ditekan
 if (isset($_POST['update_profile'])) {
     $name = $_POST['name'];
     $bio = $_POST['bio'];
 
-    // Secara default, biarkan menggunakan foto lama jika user tidak mengupload file baru
+    // Default gambar lama
     $profile_pic = $user_data['profile_pic'];
     $header_pic = $user_data['header_pic'];
 
-    // 1. PROSES UPLOAD FOTO PROFIL (AVATAR)
+    // Upload Avatar
     if (!empty($_FILES['avatar']['name'])) {
-        // Beri tambahan angka waktu (time) di depan nama file agar unik
         $avatar_name = time() . "_" . $_FILES['avatar']['name'];
-        $avatar_tmp = $_FILES['avatar']['tmp_name'];
-        $avatar_path = "uploads/avatars/" . $avatar_name;
-
-        // Memindahkan file dari memori sementara ke folder tujuan
-        if (move_uploaded_file($avatar_tmp, $avatar_path)) {
-            $profile_pic = $avatar_name; // Ganti variabel dengan nama file baru
+        if (move_uploaded_file($_FILES['avatar']['tmp_name'], "uploads/avatars/" . $avatar_name)) {
+            $profile_pic = $avatar_name;
         }
     }
 
-    // 2. PROSES UPLOAD FOTO HEADER
+    // Upload Header
     if (!empty($_FILES['header']['name'])) {
         $header_name = time() . "_" . $_FILES['header']['name'];
-        $header_tmp = $_FILES['header']['tmp_name'];
-        $header_path = "uploads/headers/" . $header_name;
-
-        if (move_uploaded_file($header_tmp, $header_path)) {
+        if (move_uploaded_file($_FILES['header']['tmp_name'], "uploads/headers/" . $header_name)) {
             $header_pic = $header_name;
         }
     }
 
-    // Simpan Perubahan ke Database
+    // Eksekusi Update
     if ($userObj->updateProfile($user_id, $name, $bio, $profile_pic, $header_pic)) {
-        $_SESSION['name'] = $name; // Perbarui session nama jika ada perubahan
-        $msg = "Profil berhasil diperbarui, Meow!";
-        $user_data = $userObj->getUserById($user_id); // Refresh / Panggil ulang data terbaru
+        $_SESSION['name'] = $name;
+        Flash::set('success', 'Profil berhasil diperbarui, Meow!');
     } else {
-        $msg = "Gagal memperbarui profil, Meow-af.";
+        Flash::set('error', 'Gagal memperbarui profil, Meow-af.');
     }
+
+    header("Location: edit_profile.php");
+    exit;
 }
 ?>
 
@@ -204,10 +195,16 @@ if (isset($_POST['update_profile'])) {
         </div>
 
         <div class="mid-col">
-            <div class="header">⚙️ Edit Profile</div>
+            <div class="header">Edit Profile</div>
 
             <div class="edit-form">
-                <?php if ($msg) echo "<div class='msg-box'>$msg</div>"; ?>
+                <?php
+                $flash = Flash::get();
+                if ($flash) {
+                    // Jika flash sukses, class CSS 'success', jika error, class 'error'
+                    echo "<div class='flash-msg " . ($flash['type'] == 'success' ? 'success' : 'error') . "'>{$flash['message']}</div>";
+                }
+                ?>
 
                 <form method="POST" action="" enctype="multipart/form-data">
 

@@ -7,6 +7,9 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Di bagian atas file login.php, ambil data dari cookie jika ada
+$saved_username = isset($_COOKIE['meower_user']) ? $_COOKIE['meower_user'] : '';
+
 // Panggil Class User
 require_once 'classes/User.php';
 $userObj = new User();
@@ -15,6 +18,7 @@ $userObj = new User();
 $login_error = "";
 $register_error = "";
 $register_success = "";
+
 
 // Variabel untuk melacak form mana yang terakhir dibuka
 $show_register = false;
@@ -40,6 +44,10 @@ if (isset($_POST['login'])) {
     $password = $_POST['password'];
 
     if ($userObj->login($username, $password)) {
+        // Jika checkbox dicentang, buat cookie selama 30 hari
+        if (isset($_POST['remember'])) {
+            setcookie('meower_user', $username, time() + (86400 * 30), "/");
+        }
         header("Location: home.php");
         exit;
     } else {
@@ -47,6 +55,7 @@ if (isset($_POST['login'])) {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -141,6 +150,26 @@ if (isset($_POST['login'])) {
             color: #5cb85c;
             border: 1px solid #5cb85c;
         }
+
+        .flash-msg {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 
@@ -154,8 +183,12 @@ if (isset($_POST['login'])) {
         <?php if ($register_success) echo "<div class='msg success'>$register_success</div>"; ?>
 
         <form method="POST" action="">
-            <input type="text" name="username" placeholder="Username" required>
+            <input type="text" name="username" value="<?php echo htmlspecialchars($saved_username); ?>" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
+            <div style="margin: 15px 0; text-align: left; font-size: 14px;">
+                <input type="checkbox" name="remember" id="remember" style="width: auto; margin: 0 5px 0 0;">
+                <label for="remember">Ingat Saya</label>
+            </div>
             <button type="submit" name="login">Masuk</button>
         </form>
         <span class="toggle-link" onclick="toggleForms()">Belum punya akun? Daftar di sini!</span>

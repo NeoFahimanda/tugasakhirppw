@@ -11,9 +11,21 @@ $interactionObj = new Interaction(); // Inisialisasi Class baru
 if (isset($_POST['submit_post']) && isset($_SESSION['user_id'])) {
     $content = $_POST['content'];
     $user_id = $_SESSION['user_id'];
+    $post_image = null;
 
-    if ($postObj->createPost($user_id, $content)) {
-        header("Location: home.php"); // Refresh halaman agar post baru muncul
+    // Logika Upload Gambar Postingan (Materi Praktikum 13-14)
+    if (!empty($_FILES['post_img']['name'])) {
+        $image_name = time() . "_" . $_FILES['post_img']['name'];
+        $image_tmp = $_FILES['post_img']['tmp_name'];
+        $target_path = "uploads/posts/" . $image_name;
+
+        if (move_uploaded_file($image_tmp, $target_path)) {
+            $post_image = $image_name;
+        }
+    }
+
+    if ($postObj->createPost($user_id, $content, $post_image)) {
+        header("Location: home.php");
         exit;
     }
 }
@@ -118,6 +130,11 @@ $all_posts = $postObj->getAllPosts();
             resize: none;
         }
 
+        .btn-upload {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
         .btn-meow {
             background: #ff914d;
             color: white;
@@ -168,6 +185,26 @@ $all_posts = $postObj->getAllPosts();
             border-left: 1px solid #ddd;
             background: white;
         }
+
+        .flash-msg {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 
@@ -184,10 +221,11 @@ $all_posts = $postObj->getAllPosts();
 
             <?php if (isset($_SESSION['user_id'])): ?>
                 <div class="post-form">
-                    <form method="POST" action="">
-                        <textarea name="content" rows="3" placeholder="Apa yang sedang terjadi, Meow?" required></textarea>
+                    <form method="POST" action="" enctype="multipart/form-data">
+                        <textarea name="content" rows="3" placeholder="Apa yang sedang kamu pikirkan, Meow?" required></textarea>
                         <button type="submit" name="submit_post" class="btn-meow">Meow</button>
-                        <div style="clear:both;"></div>
+                        <input type="file" name="post_img" accept="image/png, image/jpeg" class="btn-upload">
+
                     </form>
                 </div>
             <?php else: ?>
@@ -220,6 +258,15 @@ $all_posts = $postObj->getAllPosts();
                             <p style="margin: 10px 0 0 0; line-height: 1.5; cursor: pointer;">
                                 <?php echo htmlspecialchars($post['content']); ?>
                             </p>
+                            <?php if (!empty($post['post_image'])): ?>
+                                <div style="margin-top: 10px;">
+                                    <img src="uploads/posts/<?php echo $post['post_image']; ?>" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
+
+                                    <div style="margin-top: 5px;">
+                                        <a href="download.php?file=<?php echo urlencode($post['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">📥 Download Gambar</a>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </a>
 
                         <?php

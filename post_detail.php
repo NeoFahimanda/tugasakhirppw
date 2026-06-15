@@ -27,16 +27,10 @@ if (isset($_GET['delete_id']) && isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
 
     // Eksekusi hapus
+    // ... dalam logika delete ...
     $postObj->deletePost($id_to_delete, $user_id);
-
-    // Cek apakah yang dihapus itu Post Utama atau sekadar Balasan?
-    if ($id_to_delete == $post_id) {
-        // Jika post utama dihapus, tendang user kembali ke home
-        header("Location: home.php");
-    } else {
-        // Jika hanya balasan yang dihapus, refresh halaman detail ini
-        header("Location: post_detail.php?id=" . $post_id);
-    }
+    Flash::set('success', 'Meow berhasil dihapus!');
+    header("Location: post_detail.php?id=" . $post_id); // atau home.php
     exit;
 }
 
@@ -65,6 +59,8 @@ if (isset($_GET['like_id'])) {
 // Ambil semua balasan
 $replies = $postObj->getRepliesByPostId($post_id);
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -178,6 +174,26 @@ $replies = $postObj->getRepliesByPostId($post_id);
             float: right;
             margin-top: 10px;
         }
+
+        .flash-msg {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 
@@ -245,6 +261,15 @@ $replies = $postObj->getRepliesByPostId($post_id);
                         </div>
 
                         <p style="margin: 10px 0 0 0; line-height: 1.5;"><?php echo htmlspecialchars($reply['content']); ?></p>
+                        <?php if (!empty($post['post_image'])): ?>
+                            <div style="margin-top: 10px;">
+                                <img src="uploads/posts/<?php echo $post['post_image']; ?>" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
+
+                                <div style="margin-top: 5px;">
+                                    <a href="download.php?file=<?php echo urlencode($post['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">📥 Download Gambar</a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endforeach; ?>

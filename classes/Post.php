@@ -12,11 +12,12 @@ class Post
     }
 
     // Fungsi membuat Meow baru (Insert)
-    public function createPost($user_id, $content)
+    public function createPost($user_id, $content, $image = null)
     {
         $content = $this->db->real_escape_string($content);
-        $query = "INSERT INTO posts (user_id, content) VALUES ('$user_id', '$content')";
+        $image = $image ? "'" . $this->db->real_escape_string($image) . "'" : "NULL";
 
+        $query = "INSERT INTO posts (user_id, content, post_image, parent_id) VALUES ('$user_id', '$content', $image, NULL)";
         return $this->db->query($query);
     }
 
