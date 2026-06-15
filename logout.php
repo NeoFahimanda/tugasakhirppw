@@ -8,5 +8,5 @@ session_unset();
 session_destroy();
 
 // Arahkan kembali ke halaman awal (Landing Page)
-header("Location: index.php");
+header("Location: home.php");
 exit;

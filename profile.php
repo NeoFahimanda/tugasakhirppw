@@ -31,7 +31,7 @@ if (isset($_GET['delete_id']) && isset($_SESSION['user_id'])) {
 
 if (isset($_GET['like_id'])) {
     if (!isset($_SESSION['user_id'])) {
-        echo "<script>alert('Meow-af, silakan login untuk menyukai Meow ini!'); window.location.href='index.php';</script>";
+        echo "<script>alert('Meow-af, silakan login untuk menyukai Meow ini!'); window.location.href='login.php';</script>";
         exit;
     }
 
@@ -244,7 +244,9 @@ $user_posts = $postObj->getPostsByUserId($profile_data['id']);
                                 <?php endif; ?>
                             </div>
 
-                            <p style="margin: 10px 0 0 0; line-height: 1.5;"><?php echo htmlspecialchars($post['content']); ?></p>
+                            <a href="post_detail.php?id=<?php echo $post['id']; ?>" style="text-decoration: none; color: inherit; display: block;">
+                                <p style="margin: 10px 0 0 0; line-height: 1.5;"><?php echo htmlspecialchars($post['content']); ?></p>
+                            </a>
 
                             <?php
                             $like_count = $interactionObj->getLikeCount($post['id']);
@@ -252,12 +254,15 @@ $user_posts = $postObj->getPostsByUserId($profile_data['id']);
                             $is_liked = $interactionObj->isLikedByUser($current_user_id, $post['id']);
                             ?>
 
-                            <div style="margin-top: 15px;">
+                            <div style="margin-top: 15px; display: flex; gap: 20px;">
                                 <a href="profile.php?username=<?php echo urlencode($username); ?>&like_id=<?php echo $post['id']; ?>" style="text-decoration: none; font-size: 14px; color: #555;">
                                     <?php echo $is_liked ? '❤️' : '🤍'; ?>
                                     <span style="<?php echo $is_liked ? 'color: red; font-weight: bold;' : ''; ?>">
                                         <?php echo $like_count; ?>
                                     </span>
+                                </a>
+                                <a href="post_detail.php?id=<?php echo $post['id']; ?>" style="text-decoration: none; font-size: 14px; color: #555;">
+                                    💬 Balas
                                 </a>
                             </div>
                         </div>

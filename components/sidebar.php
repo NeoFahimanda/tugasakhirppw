@@ -7,6 +7,6 @@
         <a href="edit_profile.php">⚙️ Settings</a>
         <a href="logout.php" style="color: red; margin-top: 20px;">🚪 Logout</a>
     <?php else: ?>
-        <a href="index.php" style="color: #ff914d; font-weight:bold;">🔑 Login / Daftar</a>
+        <a href="login.php" style="color: #ff914d; font-weight:bold;">🔑 Login / Daftar</a>
     <?php endif; ?>
 </div>

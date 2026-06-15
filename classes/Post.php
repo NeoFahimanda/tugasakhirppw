@@ -26,6 +26,7 @@ class Post
         $query = "SELECT posts.*, users.name, users.username, users.profile_pic 
                   FROM posts 
                   JOIN users ON posts.user_id = users.id 
+                  WHERE posts.parent_id IS NULL
                   ORDER BY posts.created_at DESC";
         $result = $this->db->query($query);
 
@@ -44,7 +45,7 @@ class Post
         $query = "SELECT posts.*, users.name, users.username, users.profile_pic 
                   FROM posts 
                   JOIN users ON posts.user_id = users.id 
-                  WHERE posts.user_id = '$user_id'
+                  WHERE posts.user_id = '$user_id' AND posts.parent_id IS NULL
                   ORDER BY posts.created_at DESC";
         $result = $this->db->query($query);
 
@@ -65,6 +66,50 @@ class Post
 
         // Query DELETE sesuai materi PHP MySQL dasar
         $query = "DELETE FROM posts WHERE id = '$post_id' AND user_id = '$user_id'";
+        return $this->db->query($query);
+    }
+
+    // --- FITUR REPLY ---
+
+    // 1. Ambil 1 Meow spesifik berdasarkan ID
+    public function getPostById($post_id)
+    {
+        $post_id = $this->db->real_escape_string($post_id);
+        $query = "SELECT posts.*, users.name, users.username, users.profile_pic 
+                  FROM posts 
+                  JOIN users ON posts.user_id = users.id 
+                  WHERE posts.id = '$post_id'";
+        $result = $this->db->query($query);
+        return $result->fetch_assoc();
+    }
+
+    // 2. Ambil semua balasan (replies) dari sebuah Meow
+    public function getRepliesByPostId($parent_id)
+    {
+        $parent_id = $this->db->real_escape_string($parent_id);
+        // ASC agar balasan pertama (terlama) muncul di atas
+        $query = "SELECT posts.*, users.name, users.username, users.profile_pic 
+                  FROM posts 
+                  JOIN users ON posts.user_id = users.id 
+                  WHERE posts.parent_id = '$parent_id'
+                  ORDER BY posts.created_at ASC";
+        $result = $this->db->query($query);
+
+        $replies = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $replies[] = $row;
+            }
+        }
+        return $replies;
+    }
+
+    // 3. Fungsi membuat Reply (mirip createPost tapi ada parent_id)
+    public function createReply($user_id, $content, $parent_id)
+    {
+        $content = $this->db->real_escape_string($content);
+        $parent_id = $this->db->real_escape_string($parent_id);
+        $query = "INSERT INTO posts (user_id, content, parent_id) VALUES ('$user_id', '$content', '$parent_id')";
         return $this->db->query($query);
     }
 }
