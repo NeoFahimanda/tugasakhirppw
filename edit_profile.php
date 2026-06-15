@@ -24,16 +24,42 @@ if (isset($_POST['update_profile'])) {
     $profile_pic = $user_data['profile_pic'];
     $header_pic = $user_data['header_pic'];
 
-    // Upload Avatar
-    if (!empty($_FILES['avatar']['name'])) {
+    // 1. Upload Avatar (Cropped Base64 prioritised)
+    if (!empty($_POST['avatar_cropped'])) {
+        $avatar_base64 = $_POST['avatar_cropped'];
+        // Remove base64 header
+        $avatar_base64 = preg_replace('#^data:image/\w+;base64,#i', '', $avatar_base64);
+        $avatar_base64 = str_replace(' ', '+', $avatar_base64);
+        $avatar_data = base64_decode($avatar_base64);
+        
+        $avatar_name = time() . "_avatar.jpg";
+        $avatar_path = "uploads/avatars/" . $avatar_name;
+        
+        if (file_put_contents($avatar_path, $avatar_data)) {
+            $profile_pic = $avatar_name;
+        }
+    } else if (!empty($_FILES['avatar']['name'])) {
         $avatar_name = time() . "_" . $_FILES['avatar']['name'];
         if (move_uploaded_file($_FILES['avatar']['tmp_name'], "uploads/avatars/" . $avatar_name)) {
             $profile_pic = $avatar_name;
         }
     }
 
-    // Upload Header
-    if (!empty($_FILES['header']['name'])) {
+    // 2. Upload Header (Cropped Base64 prioritised)
+    if (!empty($_POST['header_cropped'])) {
+        $header_base64 = $_POST['header_cropped'];
+        // Remove base64 header
+        $header_base64 = preg_replace('#^data:image/\w+;base64,#i', '', $header_base64);
+        $header_base64 = str_replace(' ', '+', $header_base64);
+        $header_data = base64_decode($header_base64);
+        
+        $header_name = time() . "_header.jpg";
+        $header_path = "uploads/headers/" . $header_name;
+        
+        if (file_put_contents($header_path, $header_data)) {
+            $header_pic = $header_name;
+        }
+    } else if (!empty($_FILES['header']['name'])) {
         $header_name = time() . "_" . $_FILES['header']['name'];
         if (move_uploaded_file($_FILES['header']['tmp_name'], "uploads/headers/" . $header_name)) {
             $header_pic = $header_name;
@@ -58,192 +84,15 @@ if (isset($_POST['update_profile'])) {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile / Meower</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-        }
-
-        .layout-container {
-            display: flex;
-            max-width: 1000px;
-            margin: 0 auto;
-            min-height: 100vh;
-        }
-
-        /* Layout Kolom (Sama seperti home.php) */
-        .left-col {
-            width: 25%;
-            padding: 20px;
-            border-right: 1px solid #ddd;
-            background: white;
-        }
-
-        .left-col a {
-            display: block;
-            padding: 10px 0;
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .left-col a:hover {
-            color: #ff914d;
-        }
-
-        .mid-col {
-            width: 50%;
-            background: white;
-        }
-
-        .right-col {
-            width: 25%;
-            padding: 20px;
-            border-left: 1px solid #ddd;
-            background: white;
-        }
-
-        .header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #ddd;
-            font-weight: bold;
-            font-size: 20px;
-        }
-
-        /* Form Edit Profil */
-        .edit-form {
-            padding: 20px;
-        }
-
-        .edit-form label {
-            font-weight: bold;
-            display: block;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        .edit-form input[type="text"],
-        .edit-form textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        .edit-form input[type="file"] {
-            margin-top: 5px;
-            font-size: 14px;
-        }
-
-        .btn-save {
-            background: #ff914d;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            font-size: 16px;
-        }
-
-        .btn-save:hover {
-            background: #e57c38;
-        }
-
-        .msg-box {
-            padding: 10px;
-            background: #e6ffe6;
-            color: #5cb85c;
-            border: 1px solid #5cb85c;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-
-        /* Preview Gambar Saat Ini */
-        .preview-img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            vertical-align: middle;
-            margin-right: 10px;
-            border: 1px solid #ddd;
-        }
-
-        .preview-header {
-            width: 100px;
-            height: 40px;
-            object-fit: cover;
-            vertical-align: middle;
-            margin-right: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        /* === CSS DARK MODE STYLING === */
-        body.dark-mode {
-            background-color: #15202b;
-            color: #ffffff;
-        }
-
-        body.dark-mode .mid-col,
-        body.dark-mode .left-col,
-        body.dark-mode .right-col {
-            background-color: #15202b;
-            border-color: #38444d;
-            color: #ffffff;
-        }
-
-        body.dark-mode .header {
-            background: rgba(21, 32, 43, 0.9);
-            border-color: #38444d;
-            color: #ffffff;
-        }
-
-        body.dark-mode .feed-post {
-            border-color: #38444d;
-        }
-
-        body.dark-mode .feed-post h4,
-        body.dark-mode .left-col a {
-            color: #ffffff;
-        }
-
-        body.dark-mode .post-form textarea {
-            background-color: transparent;
-            color: #ffffff;
-        }
-
-        body.dark-mode input[name="search"] {
-            background-color: #253341 !important;
-            border-color: #38444d !important;
-            color: #ffffff !important;
-        }
-
-        body.dark-mode .custom-file-upload {
-            background: #1e2d3b;
-        }
-
-        /* Mode Terang */
-        .widget-box {
-            background-color: #f7f9fa;
-            color: #000;
-        }
-
-        /* Mode Gelap */
-        body.dark-mode .widget-box {
-            background-color: #192734;
-            color: #fff;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Cropper.js CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 </head>
 
 <body class="<?php echo $theme_preference == 'dark' ? 'dark-mode' : ''; ?>">
@@ -255,36 +104,158 @@ if (isset($_POST['update_profile'])) {
         </div>
 
         <div class="mid-col">
-            <div class="header">Edit Profile</div>
+            <div class="header-title">
+                <a href="profile.php?username=<?php echo urlencode($user_data['username']); ?>" style="margin-right: 15px;">⬅️</a>
+                <span>Edit Profile</span>
+            </div>
 
             <div class="edit-form">
                 <?php
                 $flash = Flash::get();
                 if ($flash) {
-                    // Jika flash sukses, class CSS 'success', jika error, class 'error'
                     echo "<div class='flash-msg " . ($flash['type'] == 'success' ? 'success' : 'error') . "'>{$flash['message']}</div>";
                 }
                 ?>
 
-                <form method="POST" action="" enctype="multipart/form-data">
+                <form method="POST" action="" enctype="multipart/form-data" id="profileEditForm">
+                    <input type="hidden" name="avatar_cropped" id="avatar_cropped_input">
+                    <input type="hidden" name="header_cropped" id="header_cropped_input">
 
-                    <label>Display Name</label>
-                    <input type="text" name="name" value="<?php echo htmlspecialchars($user_data['name']); ?>" required>
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" name="name" value="<?php echo htmlspecialchars($user_data['name']); ?>" required>
+                    </div>
 
-                    <label>Bio</label>
-                    <textarea name="bio" rows="4" placeholder="Ceritakan tentang dirimu, Meow..."><?php echo htmlspecialchars($user_data['bio'] ?? ''); ?></textarea>
+                    <div class="form-group">
+                        <label>Bio</label>
+                        <textarea name="bio" rows="4" placeholder="Ceritakan tentang dirimu, Meow..."><?php echo htmlspecialchars($user_data['bio'] ?? ''); ?></textarea>
+                    </div>
 
-                    <label>Foto Profil (Avatar)</label>
-                    <img src="uploads/avatars/<?php echo $user_data['profile_pic']; ?>" class="preview-img">
-                    <input type="file" name="avatar" accept="image/png, image/jpeg">
+                    <div class="form-group">
+                        <label>Foto Profil (Avatar)</label>
+                        <div class="file-upload-wrapper">
+                            <img src="uploads/avatars/<?php echo $user_data['profile_pic']; ?>" class="preview-img" id="avatarPreview" onerror="this.src='uploads/avatars/default_avatar.png'">
+                            <label for="avatar" class="custom-file-upload">📷 Pilih Foto Profil</label>
+                            <input type="file" name="avatar" id="avatar" accept="image/png, image/jpeg" class="input-file-hidden">
+                        </div>
+                    </div>
 
-                    <label>Foto Sampul (Header)</label>
-                    <img src="uploads/headers/<?php echo $user_data['header_pic']; ?>" class="preview-header">
-                    <input type="file" name="header" accept="image/png, image/jpeg">
+                    <div class="form-group">
+                        <label>Foto Sampul (Header)</label>
+                        <div class="file-upload-wrapper">
+                            <img src="uploads/headers/<?php echo $user_data['header_pic']; ?>" class="preview-header" id="headerPreview" onerror="this.src='uploads/headers/default_header.png'">
+                            <label for="header" class="custom-file-upload">🖼️ Pilih Foto Sampul</label>
+                            <input type="file" name="header" id="header" accept="image/png, image/jpeg" class="input-file-hidden">
+                        </div>
+                    </div>
 
-                    <button type="submit" name="update_profile" class="btn-save">Simpan Perubahan</button>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+                        <button type="submit" name="update_profile" class="btn-save">Simpan Perubahan</button>
+                    </div>
                 </form>
             </div>
+
+            <!-- Modal Cropper -->
+            <div id="cropperModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 20px;">
+                <div style="background-color: var(--bg-card); border-radius: var(--radius-lg); padding: 24px; max-width: 500px; width: 100%; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow-lg);">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800;" id="cropperModalTitle">Potong Gambar</h3>
+                    <div style="max-height: 350px; overflow: hidden; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background-color: #000;">
+                        <img id="cropperImage" style="max-width: 100%; display: block;" src="">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 12px; margin-top: 10px;">
+                        <button type="button" id="cancelCropBtn" style="padding: 10px 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); font-weight: 700; border-radius: var(--radius-xl); cursor: pointer; flex: 1; transition: all 0.2s;">Batal</button>
+                        <button type="button" id="applyCropBtn" style="padding: 10px 20px; border: none; background: var(--primary); color: white; font-weight: 700; border-radius: var(--radius-xl); cursor: pointer; flex: 1; transition: all 0.2s;">Potong & Terapkan</button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                let cropper = null;
+                let currentCropTarget = '';
+                const cropperModal = document.getElementById('cropperModal');
+                const cropperImage = document.getElementById('cropperImage');
+                const cropperModalTitle = document.getElementById('cropperModalTitle');
+                const cancelCropBtn = document.getElementById('cancelCropBtn');
+                const applyCropBtn = document.getElementById('applyCropBtn');
+
+                // Inputs
+                const avatarInput = document.getElementById('avatar');
+                const headerInput = document.getElementById('header');
+
+                avatarInput.addEventListener('change', function(e) {
+                    handleFileSelect(e, 'avatar');
+                });
+
+                headerInput.addEventListener('change', function(e) {
+                    handleFileSelect(e, 'header');
+                });
+
+                function handleFileSelect(e, target) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        currentCropTarget = target;
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            cropperImage.src = event.target.result;
+                            cropperModalTitle.textContent = target === 'avatar' ? 'Potong Foto Profil (1:1)' : 'Potong Foto Sampul (16:5)';
+                            cropperModal.style.display = 'flex';
+                            
+                            if (cropper) {
+                                cropper.destroy();
+                            }
+                            
+                            cropper = new Cropper(cropperImage, {
+                                aspectRatio: target === 'avatar' ? 1 : 16 / 5,
+                                viewMode: 1,
+                                autoCropArea: 1,
+                                responsive: true,
+                                restore: false,
+                                checkCrossOrigin: false
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+
+                cancelCropBtn.addEventListener('click', function() {
+                    cropperModal.style.display = 'none';
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                    }
+                    if (currentCropTarget === 'avatar') {
+                        avatarInput.value = '';
+                    } else {
+                        headerInput.value = '';
+                    }
+                });
+
+                applyCropBtn.addEventListener('click', function() {
+                    if (cropper) {
+                        let canvasOptions = {};
+                        if (currentCropTarget === 'avatar') {
+                            canvasOptions = { width: 300, height: 300 };
+                        } else {
+                            canvasOptions = { width: 800, height: 250 };
+                        }
+                        
+                        const canvas = cropper.getCroppedCanvas(canvasOptions);
+                        const base64Data = canvas.toDataURL('image/jpeg', 0.9);
+                        
+                        if (currentCropTarget === 'avatar') {
+                            document.getElementById('avatarPreview').src = base64Data;
+                            document.getElementById('avatar_cropped_input').value = base64Data;
+                        } else {
+                            document.getElementById('headerPreview').src = base64Data;
+                            document.getElementById('header_cropped_input').value = base64Data;
+                        }
+                        
+                        cropperModal.style.display = 'none';
+                        cropper.destroy();
+                        cropper = null;
+                    }
+                });
+            </script>
         </div>
 
         <div class="right-col">
