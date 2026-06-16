@@ -1,0 +1,4 @@
+xammp
+mysql
+vscode
+chrome
