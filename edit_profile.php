@@ -1,5 +1,9 @@
 <?php
 session_start();
+// Ambil data cookie tema, jika belum disetel default-nya adalah 'light'
+$theme_preference = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
+
+// ... sisa require_once dan logika database yang sudah ada ...
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -183,10 +187,66 @@ if (isset($_POST['update_profile'])) {
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
+        /* === CSS DARK MODE STYLING === */
+        body.dark-mode {
+            background-color: #15202b;
+            color: #ffffff;
+        }
+
+        body.dark-mode .mid-col,
+        body.dark-mode .left-col,
+        body.dark-mode .right-col {
+            background-color: #15202b;
+            border-color: #38444d;
+            color: #ffffff;
+        }
+
+        body.dark-mode .header {
+            background: rgba(21, 32, 43, 0.9);
+            border-color: #38444d;
+            color: #ffffff;
+        }
+
+        body.dark-mode .feed-post {
+            border-color: #38444d;
+        }
+
+        body.dark-mode .feed-post h4,
+        body.dark-mode .left-col a {
+            color: #ffffff;
+        }
+
+        body.dark-mode .post-form textarea {
+            background-color: transparent;
+            color: #ffffff;
+        }
+
+        body.dark-mode input[name="search"] {
+            background-color: #253341 !important;
+            border-color: #38444d !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-mode .custom-file-upload {
+            background: #1e2d3b;
+        }
+
+        /* Mode Terang */
+        .widget-box {
+            background-color: #f7f9fa;
+            color: #000;
+        }
+
+        /* Mode Gelap */
+        body.dark-mode .widget-box {
+            background-color: #192734;
+            color: #fff;
+        }
     </style>
 </head>
 
-<body>
+<body class="<?php echo $theme_preference == 'dark' ? 'dark-mode' : ''; ?>">
 
     <div class="layout-container">
 

@@ -1,5 +1,9 @@
 <?php
 session_start();
+// Ambil data cookie tema, jika belum disetel default-nya adalah 'light'
+$theme_preference = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
+
+// ... sisa require_once dan logika database yang sudah ada ...
 require_once 'classes/User.php';
 require_once 'classes/Post.php';
 require_once 'classes/Interaction.php'; // Tambahkan ini
@@ -214,10 +218,95 @@ $user_posts = $postObj->getPostsByUserId($profile_data['id']);
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        /* === CSS DARK MODE STYLING === */
+        body.dark-mode {
+            background-color: #15202b;
+            color: #ffffff;
+        }
+
+        body.dark-mode .mid-col,
+        body.dark-mode .left-col,
+        body.dark-mode .right-col {
+            background-color: #15202b;
+            border-color: #38444d;
+            color: #ffffff;
+        }
+
+        body.dark-mode .header-title,
+        body.dark-mode .header {
+            background-color: #15202b !important;
+            border-bottom: 1px solid #38444d !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-mode .header-title a {
+            color: #ffffff !important;
+        }
+
+        body.dark-mode a[href="edit_profile.php"],
+        body.dark-mode .btn-edit-profile {
+            color: #ffffff !important;
+            border-color: #ff914d !important;
+            /* Memberi tepian oranye khas Meower agar kontras */
+            background-color: transparent;
+        }
+
+        body.dark-mode a[href="edit_profile.php"]:hover {
+            background-color: rgba(255, 145, 77, 0.1);
+        }
+
+        /* 3. Memperbaiki Warna Teks Bio agar Terang dan Mudah Dibaca */
+        body.dark-mode .profile-info p,
+        body.dark-mode .profile-text p,
+        body.dark-mode .bio-text {
+            color: #e1e8ed !important;
+            /* Warna abu-abu terang khas teks media sosial mode malam */
+        }
+
+        /* Tambahan: Pastikan pembatas garis bawah postingan di profil ikut gelap */
+        body.dark-mode .feed-post {
+            border-color: #38444d;
+        }
+
+        body.dark-mode .feed-post h4 {
+            color: #ffffff;
+        }
+
+        body.dark-mode .left-col a {
+            color: #ffffff;
+        }
+
+        body.dark-mode .post-form textarea {
+            background-color: transparent;
+            color: #ffffff;
+        }
+
+        body.dark-mode input[name="search"] {
+            background-color: #253341 !important;
+            border-color: #38444d !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-mode .custom-file-upload {
+            background: #1e2d3b;
+        }
+
+        /* Mode Terang */
+        .widget-box {
+            background-color: #f7f9fa;
+            color: #000;
+        }
+
+        /* Mode Gelap */
+        body.dark-mode .widget-box {
+            background-color: #192734;
+            color: #fff;
+        }
     </style>
 </head>
 
-<body>
+<body class="<?php echo $theme_preference == 'dark' ? 'dark-mode' : ''; ?>">
 
     <div class="layout-container">
 

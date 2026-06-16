@@ -17,7 +17,7 @@ $search_value = isset($_GET['search']) ? $_GET['search'] : '';
     </div>
 </form>
 
-<div style="background-color: #f7f9fa; border-radius: 16px; padding: 15px; margin-top: 15px; font-family: inherit;">
+<div class="widget-box" style="border-radius: 16px; padding: 15px; margin-top: 15px; font-family: inherit;">
     <h3 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 800;">Popular Meowers 🐾</h3>
 
     <?php if (!empty($top_meowers)): ?>
@@ -31,7 +31,7 @@ $search_value = isset($_GET['search']) ? $_GET['search'] : '';
                         onerror="this.src='uploads/avatars/default_avatar.png'">
 
                     <div>
-                        <a href="profile.php?username=<?php echo urlencode($top_user['username']); ?>" style="text-decoration: none; color: #14171a; font-weight: bold; display: block;">
+                        <a href="profile.php?username=<?php echo urlencode($top_user['username']); ?>" style="text-decoration: none; color: #657786; font-weight: bold; display: block;">
                             <?php echo htmlspecialchars($top_user['name']); ?>
                         </a>
                         <span style="color: #657786; font-size: 12px;">@<?php echo htmlspecialchars($top_user['username']); ?></span>

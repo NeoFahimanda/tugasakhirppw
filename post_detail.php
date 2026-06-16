@@ -243,6 +243,18 @@ $replies = $postObj->getRepliesByPostId($post_id);
             border-color: #38444d;
             color: #ffffff;
         }
+
+        /* Mode Terang */
+        .widget-box {
+            background-color: #f7f9fa;
+            color: #000;
+        }
+
+        /* Mode Gelap */
+        body.dark-mode .widget-box {
+            background-color: #192734;
+            color: #fff;
+        }
     </style>
 </head>
 
