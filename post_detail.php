@@ -64,6 +64,17 @@ if (isset($_GET['like_id'])) {
     exit;
 }
 
+// Penangkap aksi Save khusus di halaman ini
+if (isset($_GET['save_id'])) {
+    if (!isset($_SESSION['user_id'])) {
+        echo "<script>alert('Silakan login untuk menyimpan!'); window.location.href='login.php';</script>";
+        exit;
+    }
+    $interactionObj->toggleSave($_SESSION['user_id'], $_GET['save_id']);
+    header("Location: post_detail.php?id=" . $post_id);
+    exit;
+}
+
 // Ambil semua balasan
 $replies = $postObj->getRepliesByPostId($post_id);
 ?>
@@ -73,189 +84,12 @@ $replies = $postObj->getRepliesByPostId($post_id);
 
 <head>
     <meta charset="UTF-8">
-    <title>Meow by <?php echo htmlspecialchars($main_post['name']); ?></title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        .layout-container {
-            display: flex;
-            max-width: 1000px;
-            margin: 0 auto;
-            min-height: 100vh;
-        }
-
-        .left-col {
-            width: 25%;
-            padding: 20px;
-            border-right: 1px solid #ddd;
-            background: white;
-        }
-
-        .left-col a {
-            display: block;
-            padding: 10px 0;
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .left-col a:hover {
-            color: #ff914d;
-        }
-
-        .mid-col {
-            width: 50%;
-            background: white;
-        }
-
-        .right-col {
-            width: 25%;
-            padding: 20px;
-            border-left: 1px solid #ddd;
-            background: white;
-        }
-
-        .header-title {
-            padding: 15px 20px;
-            border-bottom: 1px solid #ddd;
-            font-weight: bold;
-            font-size: 20px;
-            position: sticky;
-            top: 0;
-            background: rgba(255, 255, 255, 0.9);
-            z-index: 10;
-        }
-
-        .main-post {
-            padding: 20px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            gap: 15px;
-            background: #fffaf5;
-        }
-
-        .feed-post {
-            padding: 20px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            gap: 15px;
-        }
-
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .reply-form {
-            padding: 20px;
-            border-bottom: 1px solid #ddd;
-            background: #fafafa;
-        }
-
-        .reply-form textarea {
-            width: 100%;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 16px;
-            resize: none;
-            box-sizing: border-box;
-        }
-
-        .btn-meow {
-            background: #ff914d;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            float: right;
-            margin-top: 10px;
-        }
-
-        .flash-msg {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 20px 0 20px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* === STYLING UNTUK INDIKATOR DARK MODE DI POST DETAIL === */
-        body.dark-mode {
-            background-color: #15202b;
-            color: #ffffff;
-        }
-
-        body.dark-mode .mid-col,
-        body.dark-mode .left-col,
-        body.dark-mode .right-col {
-            background-color: #15202b;
-            border-color: #38444d;
-            color: #ffffff;
-        }
-
-        body.dark-mode .header-title,
-        body.dark-mode .reply-form {
-            background-color: #15202b;
-            border-color: #38444d;
-            color: #ffffff;
-        }
-
-        body.dark-mode .main-post {
-            background-color: #1e2d3b;
-            border-color: #38444d;
-        }
-
-        body.dark-mode .feed-post {
-            border-color: #38444d;
-        }
-
-        body.dark-mode .main-post h4,
-        body.dark-mode .feed-post h4,
-        body.dark-mode .left-col a {
-            color: #ffffff;
-        }
-
-        body.dark-mode .reply-form textarea {
-            background-color: #192734;
-            border-color: #38444d;
-            color: #ffffff;
-        }
-
-        /* Mode Terang */
-        .widget-box {
-            background-color: #f7f9fa;
-            color: #000;
-        }
-
-        /* Mode Gelap */
-        body.dark-mode .widget-box {
-            background-color: #192734;
-            color: #fff;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meow by <?php echo (isset($main_post['is_ghost']) && $main_post['is_ghost'] == 1) ? 'Ghost 👻' : htmlspecialchars($main_post['name']); ?></title>
+    <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body class="<?php echo $theme_preference == 'dark' ? 'dark-mode' : ''; ?>">
@@ -267,7 +101,8 @@ $replies = $postObj->getRepliesByPostId($post_id);
 
         <div class="mid-col">
             <div class="header-title">
-                <a href="home.php" style="text-decoration:none; color:inherit; margin-right:15px;">⬅ Meow</a>
+                <a href="home.php" style="margin-right: 15px;">⬅️</a>
+                <span>Meow</span>
             </div>
 
             <?php
@@ -278,26 +113,43 @@ $replies = $postObj->getRepliesByPostId($post_id);
             ?>
 
             <div class="main-post">
-                <a href="profile.php?username=<?php echo urlencode($main_post['username']); ?>">
-                    <img src="uploads/avatars/<?php echo $main_post['profile_pic']; ?>" class="avatar" onerror="this.src='uploads/avatars/default_avatar.png'">
-                </a>
-                <div style="width: 100%;">
-                    <div style="display: flow-root;">
-                        <h4 style="margin: 0; font-size: 18px; display: inline-block;"><?php echo htmlspecialchars($main_post['name']); ?></h4>
+                <?php if (isset($main_post['is_ghost']) && $main_post['is_ghost'] == 1): ?>
+                    <div class="avatar" style="display: flex; align-items: center; justify-content: center; background: var(--border-color); color: var(--text-muted); font-size: 22px; width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;">
+                        <i class="bi bi-ghost"></i>
+                    </div>
+                <?php else: ?>
+                    <a href="profile.php?username=<?php echo urlencode($main_post['username']); ?>">
+                        <img src="uploads/avatars/<?php echo $main_post['profile_pic']; ?>" class="avatar" onerror="this.src='uploads/avatars/default_avatar.png'">
+                    </a>
+                <?php endif; ?>
+                <div style="width: 100%; margin-left: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <?php if (isset($main_post['is_ghost']) && $main_post['is_ghost'] == 1): ?>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 18px; display: inline-block;">Ghost 👻</h4>
+                                    <span style="color: var(--text-muted); display: block; font-size: 14px;">@ghost</span>
+                                </div>
+                            <?php else: ?>
+                                <a href="profile.php?username=<?php echo urlencode($main_post['username']); ?>" style="text-decoration: none; color: inherit;">
+                                    <h4 style="margin: 0; font-size: 18px; display: inline-block;"><?php echo htmlspecialchars($main_post['name']); ?></h4>
+                                    <span style="color: var(--text-muted); display: block; font-size: 14px;">@<?php echo htmlspecialchars($main_post['username']); ?></span>
+                                </a>
+                            <?php endif; ?>
+                        </div>
 
                         <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $main_post['user_id']): ?>
-                            <a href="post_detail.php?id=<?php echo $post_id; ?>&delete_id=<?php echo $main_post['id']; ?>" onclick="return confirm('Yakin ingin menghapus Meow ini?')" style="color: red; text-decoration: none; font-size: 12px; float: right;">🗑️ Hapus</a>
+                            <a href="post_detail.php?id=<?php echo $post_id; ?>&delete_id=<?php echo $main_post['id']; ?>" onclick="return confirm('Yakin ingin menghapus Meow ini?')" style="color: #ef4444; text-decoration: none; font-size: 12px; font-weight: 600;">🗑️ Hapus</a>
                         <?php endif; ?>
                     </div>
-                    <span style="color: #888;">@<?php echo htmlspecialchars($main_post['username']); ?></span>
-                    <p style="font-size: 20px; line-height: 1.5; margin: 10px 0;"><?php echo htmlspecialchars($main_post['content']); ?></p>
+                    <p style="font-size: 18px; line-height: 1.6; margin: 15px 0;"><?php echo htmlspecialchars($main_post['content']); ?></p>
 
                     <?php if (!empty($main_post['post_image'])): ?>
-                        <div style="margin-top: 10px; margin-bottom: 15px;">
-                            <img src="uploads/posts/<?php echo $main_post['post_image']; ?>" style="max-width: 100%; max-height: 350px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
-                            <div style="margin-top: 5px;">
-                                <a href="download.php?file=<?php echo urlencode($main_post['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">Download Gambar</a>
-                            </div>
+                        <div class="post-image-wrapper">
+                            <img src="uploads/posts/<?php echo $main_post['post_image']; ?>">
+                        </div>
+                        <div style="margin-top: 8px;">
+                            <a href="download.php?file=<?php echo urlencode($main_post['post_image']); ?>" class="download-link">📥 Download Gambar</a>
                         </div>
                     <?php endif; ?>
 
@@ -305,11 +157,16 @@ $replies = $postObj->getRepliesByPostId($post_id);
                     $like_count = $interactionObj->getLikeCount($main_post['id']);
                     $current_user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                     $is_liked = $interactionObj->isLikedByUser($current_user_id, $main_post['id']);
+                    $is_saved = $interactionObj->isSavedByUser($current_user_id, $main_post['id']);
                     ?>
-                    <div style="margin-top: 15px;">
-                        <a href="post_detail.php?id=<?php echo $main_post['id']; ?>&like_id=<?php echo $main_post['id']; ?>" style="text-decoration: none; color: #555;">
+                    <div class="post-actions">
+                        <a href="post_detail.php?id=<?php echo $main_post['id']; ?>&like_id=<?php echo $main_post['id']; ?>" class="post-action-btn <?php echo $is_liked ? 'liked' : ''; ?>">
                             <?php echo $is_liked ? '❤️' : '🤍'; ?>
-                            <span style="<?php echo $is_liked ? 'color: red; font-weight: bold;' : ''; ?>"><?php echo $like_count; ?></span>
+                            <span><?php echo $like_count; ?></span>
+                        </a>
+
+                        <a href="post_detail.php?id=<?php echo $main_post['id']; ?>&save_id=<?php echo $main_post['id']; ?>" class="post-action-btn <?php echo $is_saved ? 'saved' : ''; ?>" style="color: <?php echo $is_saved ? 'var(--primary)' : 'inherit'; ?>;">
+                            <?php echo $is_saved ? '🔖' : '📑'; ?> <span><?php echo $is_saved ? 'Tersimpan' : 'Simpan'; ?></span>
                         </a>
                     </div>
                 </div>
@@ -333,23 +190,25 @@ $replies = $postObj->getRepliesByPostId($post_id);
                         <img src="uploads/avatars/<?php echo $reply['profile_pic']; ?>" class="avatar" onerror="this.src='uploads/avatars/default_avatar.png'">
                     </a>
                     <div style="width: 100%;">
-                        <div>
-                            <h4 style="margin: 0; display: inline-block;"><?php echo htmlspecialchars($reply['name']); ?></h4>
-                            <span style="color: #888;">@<?php echo htmlspecialchars($reply['username']); ?></span>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <a href="profile.php?username=<?php echo urlencode($reply['username']); ?>" style="text-decoration: none; color: inherit;">
+                                <h4 style="margin: 0; display: inline-block;"><?php echo htmlspecialchars($reply['name']); ?></h4>
+                                <span style="color: var(--text-muted); font-size: 14px;">@<?php echo htmlspecialchars($reply['username']); ?></span>
+                            </a>
 
                             <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $reply['user_id']): ?>
-                                <a href="post_detail.php?id=<?php echo $post_id; ?>&delete_id=<?php echo $reply['id']; ?>" onclick="return confirm('Yakin ingin menghapus balasan ini?')" style="color: red; text-decoration: none; font-size: 12px; float: right;">🗑️ Hapus</a>
+                                <a href="post_detail.php?id=<?php echo $post_id; ?>&delete_id=<?php echo $reply['id']; ?>" onclick="return confirm('Yakin ingin menghapus balasan ini?')" style="color: #ef4444; text-decoration: none; font-size: 12px; font-weight: 600;">🗑️ Hapus</a>
                             <?php endif; ?>
                         </div>
 
-                        <p style="margin: 10px 0 0 0; line-height: 1.5;"><?php echo htmlspecialchars($reply['content']); ?></p>
+                        <p><?php echo htmlspecialchars($reply['content']); ?></p>
 
                         <?php if (!empty($reply['post_image'])): ?>
-                            <div style="margin-top: 10px;">
-                                <img src="uploads/posts/<?php echo $reply['post_image']; ?>" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
-                                <div style="margin-top: 5px;">
-                                    <a href="download.php?file=<?php echo urlencode($reply['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">Download Gambar</a>
-                                </div>
+                            <div class="post-image-wrapper">
+                                <img src="uploads/posts/<?php echo $reply['post_image']; ?>">
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <a href="download.php?file=<?php echo urlencode($reply['post_image']); ?>" class="download-link">📥 Download Gambar</a>
                             </div>
                         <?php endif; ?>
                     </div>

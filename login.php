@@ -64,137 +64,34 @@ if (isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selamat Datang di Meower</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 350px;
-            text-align: center;
-        }
-
-        h1 {
-            color: #ff914d;
-            margin-bottom: 5px;
-        }
-
-        p {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        input {
-            width: 90%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #ff914d;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            transition: 0.3s;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #e57c38;
-        }
-
-        .toggle-link {
-            color: #ff914d;
-            cursor: pointer;
-            text-decoration: underline;
-            font-size: 13px;
-            margin-top: 20px;
-            display: inline-block;
-        }
-
-        .msg {
-            font-size: 14px;
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .error {
-            background-color: #ffe6e6;
-            color: #d9534f;
-            border: 1px solid #d9534f;
-        }
-
-        .success {
-            background-color: #e6ffe6;
-            color: #5cb85c;
-            border: 1px solid #5cb85c;
-        }
-
-        .flash-msg {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
-<body>
+<body class="login-body <?php echo isset($_COOKIE['theme']) && $_COOKIE['theme'] == 'dark' ? 'dark-mode' : ''; ?>">
 
-    <div class="container" id="login-box" style="display: <?php echo $show_register ? 'none' : 'block'; ?>;">
+    <div class="login-container" id="login-box" style="display: <?php echo $show_register ? 'none' : 'block'; ?>;">
         <h1>🐱 Meower</h1>
         <p>Bagikan "Meow" mu ke seluruh dunia!</p>
-
+        
         <?php if ($login_error) echo "<div class='msg error'>$login_error</div>"; ?>
         <?php if ($register_success) echo "<div class='msg success'>$register_success</div>"; ?>
-
+        
         <form method="POST" action="">
             <input type="text" name="username" value="<?php echo htmlspecialchars($saved_username); ?>" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
-            <div style="margin: 15px 0; text-align: left; font-size: 14px;">
-                <input type="checkbox" name="remember" id="remember" style="width: auto; margin: 0 5px 0 0;">
-                <label for="remember">Ingat Saya</label>
+            <div style="margin: 15px 0; text-align: left; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" name="remember" id="remember" style="width: auto; margin: 0;">
+                <label for="remember" style="color: var(--text-muted); cursor: pointer;">Ingat Saya</label>
             </div>
             <button type="submit" name="login">Masuk</button>
         </form>
         <span class="toggle-link" onclick="toggleForms()">Belum punya akun? Daftar di sini!</span>
     </div>
 
-    <div class="container" id="register-box" style="display: <?php echo $show_register ? 'block' : 'none'; ?>;">
+    <div class="login-container" id="register-box" style="display: <?php echo $show_register ? 'block' : 'none'; ?>;">
         <h1>🐱 Daftar Meower</h1>
         <p>Gabung bersama para kucing lainnya!</p>
 

@@ -12,12 +12,11 @@ $search_value = isset($_GET['search']) ? $_GET['search'] : '';
 
 <form method="GET" action="home.php" style="margin-bottom: 20px;">
     <div style="position: relative; display: flex; align-items: center;">
-        <input type="text" name="search" value="<?php echo htmlspecialchars($search_value); ?>" placeholder="Cari Meow..."
-            style="width: 100%; padding: 12px 15px; border: 1px solid #e1e8ed; background-color: #f7f9fa; border-radius: 30px; outline: none; font-size: 15px; box-sizing: border-box;">
+        <input type="text" name="search" value="<?php echo htmlspecialchars($search_value); ?>" placeholder="Cari Meow...">
     </div>
 </form>
 
-<div class="widget-box" style="border-radius: 16px; padding: 15px; margin-top: 15px; font-family: inherit;">
+<div class="widget-box">
     <h3 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 800;">Popular Meowers 🐾</h3>
 
     <?php if (!empty($top_meowers)): ?>

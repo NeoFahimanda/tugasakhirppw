@@ -102,4 +102,26 @@ class User
         }
         return $top_users;
     }
+
+    // Fungsi untuk mendapatkan semua user untuk kontak chat, diurutkan berdasarkan chat terakhir dengan user aktif
+    public function getChatContacts($current_user_id)
+    {
+        $current_user_id = (int)$current_user_id;
+        $query = "SELECT u.id, u.name, u.username, u.profile_pic,
+                         (SELECT MAX(created_at) FROM messages 
+                          WHERE (sender_id = u.id AND receiver_id = '$current_user_id') 
+                             OR (sender_id = '$current_user_id' AND receiver_id = u.id)) as last_message_time
+                  FROM users u
+                  WHERE u.id != '$current_user_id'
+                  ORDER BY last_message_time DESC, u.name ASC";
+
+        $result = $this->db->query($query);
+        $contacts = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $contacts[] = $row;
+            }
+        }
+        return $contacts;
+    }
 }

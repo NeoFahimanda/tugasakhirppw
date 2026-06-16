@@ -12,12 +12,13 @@ class Post
     }
 
     // Fungsi membuat Meow baru (Insert)
-    public function createPost($user_id, $content, $image = null)
+    public function createPost($user_id, $content, $image = null, $is_ghost = 0)
     {
         $content = $this->db->real_escape_string($content);
         $image = $image ? "'" . $this->db->real_escape_string($image) . "'" : "NULL";
+        $is_ghost = (int)$is_ghost;
 
-        $query = "INSERT INTO posts (user_id, content, post_image, parent_id) VALUES ('$user_id', '$content', $image, NULL)";
+        $query = "INSERT INTO posts (user_id, content, post_image, parent_id, is_ghost) VALUES ('$user_id', '$content', $image, NULL, $is_ghost)";
         return $this->db->query($query);
     }
 
@@ -46,7 +47,7 @@ class Post
         $query = "SELECT posts.*, users.name, users.username, users.profile_pic 
                   FROM posts 
                   JOIN users ON posts.user_id = users.id 
-                  WHERE posts.user_id = '$user_id' AND posts.parent_id IS NULL
+                  WHERE posts.user_id = '$user_id' AND posts.parent_id IS NULL AND posts.is_ghost = 0
                   ORDER BY posts.created_at DESC";
         $result = $this->db->query($query);
 
@@ -130,6 +131,25 @@ class Post
 
         $posts = [];
         if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $posts[] = $row;
+            }
+        }
+        return $posts;
+    }
+
+    // Ambil kiriman yang bertipe Ghost (Anonym)
+    public function getGhostPosts()
+    {
+        $query = "SELECT posts.*, users.name, users.username, users.profile_pic 
+                  FROM posts 
+                  JOIN users ON posts.user_id = users.id 
+                  WHERE posts.parent_id IS NULL AND posts.is_ghost = 1
+                  ORDER BY posts.created_at DESC";
+        $result = $this->db->query($query);
+
+        $posts = [];
+        if ($result && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $posts[] = $row;
             }
